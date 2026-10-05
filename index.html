@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChemiSort: Enerji Reaktörü</title>
     <style>
-        body { margin: 0; padding: 0; background: #0d1117; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: 'Segoe UI', sans-serif; }
-        .game-box { background-color: #0d1117; color: #c9d1d9; padding: 20px; border-radius: 16px; max-width: 530px; width: 100%; box-sizing: border-box; transition: all 0.3s ease; text-align: center; }
-        h2 { color: #ffaa00; margin: 0 0 10px 0; font-size: 1.6rem; }
+        body { margin: 0; padding: 0; background: #0d1117; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+        .game-box { background-color: #0d1117; color: #c9d1d9; padding: 20px; border-radius: 16px; max-width: 500px; width: 100%; box-sizing: border-box; transition: all 0.3s ease; text-align: center; }
+        h2 { color: #ffaa00; margin: 0 0 10px 0; font-size: 1.5rem; }
         .task-panel { background: #161b22; padding: 12px; border-radius: 8px; border: 1px solid #30363d; margin-bottom: 15px; text-align: left; }
         .score-line { display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: bold; margin-bottom: 5px; }
         .score-text { color: #58a6ff; }
@@ -91,7 +91,7 @@ setInterval(() => {
         selectedId = id; el.style.outline = '3px solid #58a6ff'; el.style.outlineOffset = '2px';
     };
     belt.appendChild(el); activeAtoms.push({ id: id, type: type, x: -50, element: el });
-}, 1200); // Yoğunluk için akış biraz hızlandırıldı
+}, 1200);
 
 setInterval(() => {
     const beltWidth = belt.offsetWidth || 530;
@@ -160,3 +160,18 @@ burnBtn.onclick = () => {
             triggerReactionEffect('fail'); setTimeout(() => { alert("❌ Başarısız! Tüp 1'de 4H, Tüp 2'de 2O olmalı."); 減_clearTubes(); }, 150);
         }
     } else if (currentLevel === 2) {
+if (c0 === 1 && h0 === 4 && o1 === 4 && tube0.length === 5 && tube1.length === 4) {
+score += 500; scoreEl.innerText = score; triggerReactionEffect('success');
+setTimeout(() => { alert("💥 MÜKEMMEL! Metan başarıyla yakıldı!\n\n+500 Puan! Şimdi KRAKTER SEVİYESİ: 3. BÖLÜM!"); startLevel3(); }, 150);
+} else {
+triggerReactionEffect('fail'); setTimeout(() => { alert("❌ Başarısız! Tüp 1'de 1C + 4H, Tüp 2'de 4O olmalı."); 減_clearTubes(); }, 150);
+}
+} else if (currentLevel === 3) {
+if (c0 === 6 && h1 === 6 && tube0.length === 6 && tube1.length === 6) {
+score += 1000; scoreEl.innerText = score; triggerReactionEffect('success');
+setTimeout(() => { alert("🌿 İNANILMAZ! Bitkisel Fotosentezi tamamlayıp Glikoz sentezlediniz!\n\n+1000 Efsanevi Puan! Oyunu zirvede bitirdiniz!"); currentLevel = 1; levelEl.innerText = "Bölüm 1: Su Sentezi"; instructionsEl.innerHTML = "💧 Görev: Tüp 1'e 4H VE Tüp 2'ye 2O doldurarak 2H₂O (Su) sentezle!"; 減_clearTubes(); }, 150);
+} else {
+triggerReactionEffect('fail'); setTimeout(() => { alert("❌ REAKTÖR PATLADI! C tüpünde tam 6 Karbon, H tüpünde tam 6 Hidrojen olmalıydı. Tüplerin içine Oksijen kaçırmadığınızdan emin olun!"); 減_clearTubes(); }, 150);
+}
+}
+};
