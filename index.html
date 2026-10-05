@@ -6,18 +6,21 @@
     <title>ChemiSort: Enerji Reaktörü</title>
     <style>
         body {
+            margin: 0;
+            padding: 0;
             background-color: #0d1117;
-            color: #c9d1d9;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            margin: 0;
-            padding: 10px;
         }
         #chemisort-wrapper {
-            background-color: #161b22;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #0d1117;
             color: #c9d1d9;
             padding: 25px;
             border-radius: 16px;
@@ -25,22 +28,21 @@
             max-width: 500px;
             box-sizing: border-box;
             box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-            border: 1px solid #30363d;
-            transition: all 0.3s ease;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
         }
         h2 {
             color: #ffaa00;
-            margin: 0 0 15px 0;
+            margin: 0 0 10px 0;
             font-size: 1.6rem;
             text-align: center;
         }
         .task-panel {
-            background: #0d1117;
+            background: #161b22;
             width: 100%;
             padding: 12px;
             border-radius: 8px;
             border: 1px solid #30363d;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             box-sizing: border-box;
         }
         .score-line {
@@ -90,12 +92,11 @@
             cursor: pointer;
             position: relative;
             box-sizing: border-box;
-            background: rgba(255,255,255,0.01);
         }
-        .orange-tube { border-color: #ffaa00; }
-        .red-tube { border-color: #ff4d4d; }
-        .gray-tube { border-color: #8b949e; }
-        
+        .orange-tube { border-color: #ffaa00; background: rgba(255,170,0,0.02); }
+        .red-tube { border-color: #ff4d4d; background: rgba(255,77,77,0.02); }
+        .gray-tube { border-color: #8b949e; background: rgba(255,255,255,0.02); }
+
         .tube-label {
             position: absolute;
             top: -25px;
@@ -108,12 +109,41 @@
         .label-red { background: #ff4d4d; color: #fff; }
         .label-gray { background: #21262d; border: 1px solid #30363d; color: #fff; }
 
+        .atom {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            top: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            font-size: 15px;
+            z-index: 10;
+            user-select: none;
+        }
+        .tube-atom {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            margin-top: 2px;
+        }
+
         #burn-btn {
             margin-top: 25px;
             width: 100%;
             background: linear-gradient(135deg, #ff4d4d, #ffaa00);
             border: none;
-            padding: 14px;
+            padding: 12px;
             border-radius: 8px;
             color: white;
             font-weight: bold;
@@ -121,10 +151,6 @@
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(255,77,77,0.4);
             text-transform: uppercase;
-            transition: transform 0.1s;
-        }
-        #burn-btn:active {
-            transform: scale(0.98);
         }
 
         @keyframes gameShake {
@@ -142,22 +168,25 @@
 
 <div id="chemisort-wrapper">
     <h2>ChemiSort: Enerji Reaktörü</h2>
+    
     <div class="task-panel">
         <div class="score-line">
             <span class="score-text">Skor: <span id="b-score">0</span></span>
             <span class="level-text" id="b-level">Bölüm 1: Su Sentezi</span>
         </div>
         <div id="b-instructions" class="instructions">
-            💧 <b>Görev:</b> Tüp 1'e <b>4H</b> VE Tüp 2'ye <b>2O</b> doldurarak 2H₂O (Su) sentezle!
+            💧 <b>Görev:</b> Tüp 1'e <b>4H</b> VE Tüp 2'ye <b>2O</b> doldurarak 2H₂O (Su) Sentezle!
         </div>
     </div>
+    
     <div id="b-belt" class="belt"></div>
+    
     <div class="tubes-container">
         <div id="tube-btn-0" class="tube orange-tube">
-            <span id="lbl-0" class="tube-label label-orange">Tüp 1</span>
+            <span class="tube-label label-orange">Tüp 1</span>
         </div>
         <div id="tube-btn-1" class="tube red-tube">
-            <span id="lbl-1" class="tube-label label-red">Tüp 2</span>
+            <span class="tube-label label-red">Tüp 2</span>
         </div>
         <div id="tube-btn-2" class="tube gray-tube">
             <span class="tube-label label-gray">Çöp Kutusu</span>
@@ -167,176 +196,188 @@
 </div>
 
 <script>
-const wrapper = document.getElementById('chemisort-wrapper');
-const belt = document.getElementById('b-belt');
-const scoreEl = document.getElementById('b-score');
-const levelEl = document.getElementById('b-level');
-const instructionsEl = document.getElementById('b-instructions');
-const burnBtn = document.getElementById('burn-btn');
+    const wrapper = document.getElementById('chemisort-wrapper');
+    const belt = document.getElementById('b-belt');
+    const scoreEl = document.getElementById('b-score');
+    const levelEl = document.getElementById('b-level');
+    const instructionsEl = document.getElementById('b-instructions');
+    const burnBtn = document.getElementById('burn-btn');
 
-const types = ['H', 'O', 'C'];
-const colors = { 
-    'H': 'radial-gradient(circle at 30% 30%, #ffffff, #a3a3a3)', 
-    'O': 'radial-gradient(circle at 30% 30%, #ff4d4d, #b30000)', 
-    'C': 'radial-gradient(circle at 30% 30%, #555555, #111111)' 
-};
-const textColors = { 'H': '#000', 'O': '#fff', 'C': '#fff' };
-
-let activeAtoms = []; let tube0 = []; let tube1 = []; let score = 0; let idCounter = 0; let selectedId = null;
-let currentLevel = 1;
-
-function triggerReactionEffect(status) {
-    wrapper.classList.add('apply-shake');
-    if (status === 'success') {
-        wrapper.style.borderColor = '#2ea043';
-        wrapper.style.boxShadow = '0 0 35px rgba(46, 160, 67, 0.6)';
-    } else {
-        wrapper.style.borderColor = '#f85149';
-        wrapper.style.boxShadow = '0 0 35px rgba(248, 81, 73, 0.6)';
-    }
-    setTimeout(() => {
-        wrapper.classList.remove('apply-shake');
-        wrapper.style.borderColor = '#30363d';
-        wrapper.style.boxShadow = '0 8px 32px rgba(0,0,0,0.5)';
-    }, 450);
-}
-
-setInterval(() => {
-    if(!belt) return;
-    const type = types[Math.floor(Math.random() * types.length)]; 
-    const id = idCounter++; 
-    const el = document.createElement('div');
-    el.id = 'b-atm-' + id; 
-    el.style.cssText = "width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; cursor:pointer; position:absolute; top:15px; left:-50px; box-shadow:0 4px 8px rgba(0,0,0,0.3); font-size:15px; z-index:10; transition: outline 0.1s;";
-    el.style.background = colors[type]; 
-    el.style.color = textColors[type]; 
-    el.innerText = type;
-    
-    el.onclick = (e) => { 
-        e.stopPropagation(); 
-        if (selectedId !== null) { 
-            const prev = document.getElementById('b-atm-' + selectedId); 
-            if (prev) prev.style.outline = 'none'; 
-        } 
-        selectedId = id; 
-        el.style.outline = '3px solid #58a6ff'; 
-        el.style.outlineOffset = '2px'; 
+    const types = ['H', 'O', 'C'];
+    const colors = { 
+        'H': 'radial-gradient(circle at 30% 30%, #ffffff, #a3a3a3)', 
+        'O': 'radial-gradient(circle at 30% 30%, #ff4d4d, #b30000)', 
+        'C': 'radial-gradient(circle at 30% 30%, #555555, #111111)' 
     };
-    belt.appendChild(el); 
-    activeAtoms.push({ id: id, type: type, x: -50, element: el });
-}, 1300);
+    const textColors = { 'H': '#000', 'O': '#fff', 'C': '#fff' };
 
-setInterval(() => {
-    const beltWidth = belt.offsetWidth || 500;
-    for (let i = activeAtoms.length - 1; i >= 0; i--) {
-        const atom = activeAtoms[i]; 
-        atom.x += 2.0; 
-        atom.element.style.left = atom.x + 'px';
-        if (atom.x > beltWidth) { 
-            atom.element.remove(); 
-            activeAtoms.splice(i, 1); 
-            if (selectedId === atom.id) selectedId = null; 
+    let activeAtoms = []; 
+    let tube0 = []; 
+    let tube1 = []; 
+    let score = 0; 
+    let idCounter = 0; 
+    let selectedId = null;
+    let currentLevel = 1;
+
+    function triggerReactionEffect(status) {
+        wrapper.classList.add('apply-shake');
+        if (status === 'success') {
+            wrapper.style.backgroundColor = '#112518';
+            wrapper.style.boxShadow = '0 0 35px rgba(46, 160, 67, 0.8)';
+        } else {
+            wrapper.style.backgroundColor = '#3b1717';
+            wrapper.style.boxShadow = '0 0 35px rgba(255, 77, 77, 0.8)';
         }
+        setTimeout(() => {
+            wrapper.classList.remove('apply-shake');
+            wrapper.style.backgroundColor = '#0d1117';
+            wrapper.style.boxShadow = '0 8px 32px rgba(0,0,0,0.5)';
+        }, 500);
     }
-}, 1000 / 60);
 
-const updateVisual = (targetIdx) => {
-    const el = document.getElementById('tube-btn-' + targetIdx); 
-    const list = (targetIdx === 0) ? tube0 : tube1;
-    const lblName = (targetIdx === 0) ? "Tüp 1" : "Tüp 2";
-    const bg = (targetIdx === 0) ? '#ffaa00' : '#ff4d4d';
-    const txt = (targetIdx === 0) ? '#000' : '#fff';
-    el.innerHTML = `<span style="position: absolute; top: -25px; font-size: 0.8rem; background: ${bg}; padding: 2px 6px; border-radius: 4px; color: ${txt}; font-weight: bold;">${lblName}</span>`;
-    list.forEach(type => {
-        const s = document.createElement('div'); 
-        s.style.cssText = "width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:bold; box-shadow: 0 2px 4px rgba(0,0,0,0.3); margin-top:2px;";
-        s.style.background = colors[type]; 
-        s.style.color = textColors[type]; 
-        s.innerText = type; 
-        el.appendChild(s);
-    });
-};
+    setInterval(() => {
+        if (!belt) return;
+        const type = types[Math.floor(Math.random() * types.length)]; 
+        const id = idCounter++; 
+        const el = document.createElement('div');
+        
+        el.className = 'atom';
+        el.id = 'b-atm-' + id;
+        el.style.background = colors[type]; 
+        el.style.color = textColors[type]; 
+        el.style.left = '-50px';
+        el.innerText = type;
+        
+        el.onclick = (e) => { 
+            e.stopPropagation(); 
+            if (selectedId !== null) { 
+                const prev = document.getElementById('b-atm-' + selectedId); 
+                if (prev) prev.style.outline = 'none'; 
+            } 
+            selectedId = id; 
+            el.style.outline = '3px solid #58a6ff'; 
+            el.style.outlineOffset = '2px'; 
+        };
+        
+        belt.appendChild(el); 
+        activeAtoms.push({ id: id, type: type, x: -50, element: el });
+    }, 1200);
 
-const handleTubeClick = (targetIdx) => {
-    if (selectedId === null) return;
-    const aIdx = activeAtoms.findIndex(a => a.id === selectedId); 
-    if (aIdx === -1) return;
-    const currentList = (targetIdx === 0) ? tube0 : tube1;
-    if (currentList.length >= 5) { alert("Bu tüp doldu!"); return; }
-    const atom = activeAtoms[aIdx]; 
-    currentList.push(atom.type); 
-    updateVisual(targetIdx); 
-    atom.element.remove(); 
-    activeAtoms.splice(aIdx, 1); 
-    selectedId = null;
-};
+    setInterval(() => {
+        const beltWidth = belt.offsetWidth || 500;
+        for (let i = activeAtoms.length - 1; i >= 0; i--) {
+            const atom = activeAtoms[i]; 
+            atom.x += 2.0; 
+            atom.element.style.left = atom.x + 'px';
+            if (atom.x > beltWidth) { 
+                atom.element.remove(); 
+                activeAtoms.splice(i, 1); 
+                if (selectedId === atom.id) selectedId = null; 
+            }
+        }
+    }, 1000 / 60);
 
-document.getElementById('tube-btn-0').onclick = () => handleTubeClick(0);
-document.getElementById('tube-btn-1').onclick = () => handleTubeClick(1);
-document.getElementById('tube-btn-2').onclick = () => { 
-    if (selectedId !== null) { 
+    const updateVisual = (targetIdx) => {
+        const el = document.getElementById('tube-btn-' + targetIdx); 
+        const list = (targetIdx === 0) ? tube0 : tube1;
+        const lblName = (targetIdx === 0) ? "Tüp 1" : "Tüp 2";
+        const bg = (targetIdx === 0) ? '#ffaa00' : '#ff4d4d';
+        const txt = (targetIdx === 0) ? '#000' : '#fff';
+        
+        el.innerHTML = `<span class="tube-label" style="background: ${bg}; color: ${txt};">${lblName}</span>`;
+        
+        list.forEach(type => {
+            const s = document.createElement('div'); 
+            s.className = 'tube-atom';
+            s.style.background = colors[type]; 
+            s.style.color = textColors[type]; 
+            s.innerText = type; 
+            el.appendChild(s);
+        });
+    };
+
+    const handleTubeClick = (targetIdx) => {
+        if (selectedId === null) return;
         const aIdx = activeAtoms.findIndex(a => a.id === selectedId); 
-        if (aIdx !== -1) { 
-            activeAtoms[aIdx].element.remove(); 
-            activeAtoms.splice(aIdx, 1); 
-            selectedId = null; 
+        if (aIdx === -1) return;
+        const currentList = (targetIdx === 0) ? tube0 : tube1;
+        
+        if (currentList.length >= 5) { 
+            alert("Bu tüp doldu!"); 
+            return; 
+        }
+        
+        const atom = activeAtoms[aIdx]; 
+        currentList.push(atom.type); 
+        updateVisual(targetIdx); 
+        atom.element.remove(); 
+        activeAtoms.splice(aIdx, 1); 
+        selectedId = null;
+    };
+
+    document.getElementById('tube-btn-0').onclick = () => handleTubeClick(0);
+    document.getElementById('tube-btn-1').onclick = () => handleTubeClick(1);
+    document.getElementById('tube-btn-2').onclick = () => { 
+        if (selectedId !== null) { 
+            const aIdx = activeAtoms.findIndex(a => a.id === selectedId); 
+            if (aIdx !== -1) { 
+                activeAtoms[aIdx].element.remove(); 
+                activeAtoms.splice(aIdx, 1); 
+                selectedId = null; 
+            } 
         } 
-    } 
-};
+    };
 
-function startLevel2() {
-    currentLevel = 2;
-    levelEl.innerText = "Bölüm 2: Metan Yanması";
-    instructionsEl.innerHTML = "🔥 <b>Görev:</b> Tüp 1'e <b>CH₄</b> (1C + 4H) VE Tüp 2'ye <b>2O₂</b> (4O) doldur, reaktörü ateşle!";
-    tube0 = []; tube1 = []; updateVisual(0); updateVisual(1);
-}
-
-burnBtn.onclick = () => {
-    let hCount0 = 0; let oCount0 = 0; let cCount0 = 0;
-    let hCount1 = 0; let oCount1 = 0; let cCount1 = 0;
-    tube0.forEach(x => { if(x==='H') hCount0++; if(x==='O') oCount0++; if(x==='C') cCount0++; });
-    tube1.forEach(x => { if(x==='H') hCount1++; if(x==='O') oCount1++; if(x==='C') cCount1++; });
-
-    if (currentLevel === 1) {
-        if (hCount0 === 4 && oCount1 === 2 && tube0.length === 4 && tube1.length === 2) {
-            score += 250; scoreEl.innerText = score;
-            triggerReactionEffect('success');
-            setTimeout(() => {
-                alert("💧 BAŞARILI! 2H₂ + O₂ ➔ 2H₂O reaksiyonu sağlandı. Saf su üretildi!
-
-+250 Puan! Bölüm 2'ye geçiyorsunuz.");
-                startLevel2();
-            }, 150);
-        } else {
-            triggerReactionEffect('fail');
-            setTimeout(() => {
-                alert("❌ Başarısız! Tüp 1'de tam 4H, Tüp 2'de tam 2O olmalı. Tüpler temizleniyor.");
-                tube0 = []; tube1 = []; updateVisual(0); updateVisual(1);
-            }, 150);
-        }
-    } else if (currentLevel === 2) {
-        if (cCount0 === 1 && hCount0 === 4 && oCount1 === 4 && tube0.length === 5 && tube1.length === 4) {
-            score += 500; scoreEl.innerText = score;
-            triggerReactionEffect('success');
-            setTimeout(() => {
-                alert("💥 MÜKEMMEL! Metan gazı başarıyla yakıldı!
-CH₄ + 2O₂ ➔ CO₂ + 2H₂O
-
-+500 Puan! Oyunu tamamen bitirdiniz!");
-                currentLevel = 1; 
-                levelEl.innerText = "Bölüm 1: Su Sentezi"; 
-                instructionsEl.innerHTML = "💧 <b>Görev:</b> Tüp 1'e <b>4H</b> VE Tüp 2'ye <b>2O</b> doldurarak 2H₂O (Su) sentezle!";
-                tube0 = []; tube1 = []; updateVisual(0); updateVisual(1);
-            }, 150);
-        } else {
-            triggerReactionEffect('fail');
-            setTimeout(() => {
-                alert("❌ Başarısız! Tüp 1'de tam 1C ve 4H (CH₄), Tüp 2'de tam 4O (2O₂) olmalı. Tüpler patladı!");
-                tube0 = []; tube1 = []; updateVisual(0); updateVisual(1);
-            }, 150);
-        }
+    function startLevel2() {
+        currentLevel = 2;
+        levelEl.innerText = "Bölüm 2: Metan Yanması";
+        instructionsEl.innerHTML = "🔥 <b>Görev:</b> Tüp 1'e <b>CH₄</b> (1C + 4H) VE Tüp 2'ye <b>2O₂</b> (4O) doldur, reaktörü ateşle!";
+        tube0 = []; tube1 = []; updateVisual(0); updateVisual(1);
     }
-};
+
+    burnBtn.onclick = () => {
+        let hCount0 = 0, oCount0 = 0, cCount0 = 0;
+        let hCount1 = 0, oCount1 = 0, cCount1 = 0;
+        
+        tube0.forEach(x => { if(x==='H') hCount0++; if(x==='O') oCount0++; if(x==='C') cCount0++; });
+        tube1.forEach(x => { if(x==='H') hCount1++; if(x==='O') oCount1++; if(x==='C') cCount1++; });
+
+        if (currentLevel === 1) {
+            if (hCount0 === 4 && oCount1 === 2 && tube0.length === 4 && tube1.length === 2) {
+                score += 250; scoreEl.innerText = score;
+                triggerReactionEffect('success');
+                setTimeout(() => {
+                    alert("💧 BAŞARILI! 2H₂ + O₂ ➔ 2H₂O reaksiyonu sağlandı. Saf su üretildi!\n\n+250 Puan! Bölüm 2'ye geçiyorsunuz.");
+                    startLevel2();
+                }, 150);
+            } else {
+                triggerReactionEffect('fail');
+                setTimeout(() => {
+                    alert("❌ Başarısız! Tüp 1'de tam 4H, Tüp 2'de tam 2O olmalı. Tüpler temizleniyor.");
+                    tube0 = []; tube1 = []; updateVisual(0); updateVisual(1);
+                }, 150);
+            }
+        } else if (currentLevel === 2) {
+            if (cCount0 === 1 && hCount0 === 4 && oCount1 === 4 && tube0.length === 5 && tube1.length === 4) {
+                score += 500; scoreEl.innerText = score;
+                triggerReactionEffect('success');
+                setTimeout(() => {
+                    alert("💥 MÜKEMMEL! Metan gazı başarıyla yakıldı!\nCH₄ + 2O₂ ➔ CO₂ + 2H₂O\n\n+500 Puan! Oyunu tamamen bitirdiniz!");
+                    currentLevel = 1; 
+                    levelEl.innerText = "Bölüm 1: Su Sentezi"; 
+                    instructionsEl.innerHTML = "💧 <b>Görev:</b> Tüp 1'e <b>4H</b> VE Tüp 2'ye <b>2O</b> doldurarak 2H₂O (Su) sentezle!";
+                    tube0 = []; tube1 = []; updateVisual(0); updateVisual(1);
+                }, 150);
+            } else {
+                triggerReactionEffect('fail');
+                setTimeout(() => {
+                    alert("❌ Başarısız! Tüp 1'de tam 1C ve 4H (CH₄), Tüp 2'de tam 4O (2O₂) olmalı. Tüpler patladı!");
+                    tube0 = []; tube1 = []; updateVisual(0); updateVisual(1);
+                }, 150);
+            }
+        }
+    };
 </script>
+
 </body>
 </html>
